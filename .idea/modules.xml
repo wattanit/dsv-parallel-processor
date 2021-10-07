@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/CBSLoanProcessor.iml" filepath="$PROJECT_DIR$/.idea/CBSLoanProcessor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/DSVParallelProcessor.iml" filepath="$PROJECT_DIR$/.idea/DSVParallelProcessor.iml" />
     </modules>
   </component>
 </project>

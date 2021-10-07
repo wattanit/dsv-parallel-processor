@@ -1,0 +1,41 @@
+[[input]]
+# list all input file in a list
+# filePaths = [
+#     "test_data/test_data2.txt"
+# ]
+
+# or specify just the input directory
+directory = "test_data"
+
+separator = "|"
+
+[[output]]
+# name the output file
+outputFile = "output.tsv"
+separator = "\t"
+
+# each filter condition is listed below
+[[filter]]
+
+column = 1
+columnType = "string"
+values = [
+    "OPTION1",
+    "OPTION2"
+]
+
+[[filter]]
+column = 3
+columnType = "string"
+values = [
+    "A",
+    "B"
+]
+
+
+# or from a file, one line per one value
+# value_list = "selected_value.txt"
+
+# or as a range (for number and datetime)
+# condition = "<"
+# value = 1979-05-27T07:32:00

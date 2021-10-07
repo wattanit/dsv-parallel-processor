@@ -12,15 +12,15 @@ type WorkerSetting struct {
 }
 
 type WorkerChannels struct {
-	control chan string
+	Report  chan string
+	Wait    chan bool
+	Done    chan bool
+	Control chan string
 }
 
 func worker(index int,
 	inputFile string,
 	config WorkerSetting,
-	reportChannel chan string,
-	waitChannel chan bool,
-	doneChannel chan bool,
 	channels WorkerChannels) {
 	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
 	check(err)
@@ -42,23 +42,23 @@ func worker(index int,
 		lineNumber++
 		// finished a block, report and waiting
 		if (lineNumber % config.blockSize) == 0 {
-			reportChannel <- fmt.Sprintf("worker %d completed %d lines", index, lineNumber)
-			waitChannel <- true
+			channels.Report <- fmt.Sprintf("worker %d completed %d lines", index, lineNumber)
+			channels.Wait <- true
 
 			// proceed to write file output
 			// wait for write command
-			for <-channels.control != "write" {
+			for <-channels.Control != "write" {
 			}
 
 			// WRITE FILE HERE
 
 			// report writing complete
-			channels.control <- "done"
+			channels.Control <- "done"
 		}
 	}
 
 	if scanner.Err() != nil {
-		reportChannel <- scanner.Err().Error()
+		channels.Report <- scanner.Err().Error()
 	}
-	doneChannel <- true
+	channels.Done <- true
 }
