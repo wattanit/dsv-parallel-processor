@@ -35,11 +35,13 @@ func main() {
 	// parse CLI flags
 	numProcessFlagPtr := flag.Int("p", 1, "number of worker processes")
 	blockSizeFlagPtr := flag.Int("block-size", 100000, "processing block size in number of lines")
+	verboseFlagPtr := flag.Bool("v", false, "Display DEBUG logs")
 
 	flag.Parse()
 
 	numProcess := *numProcessFlagPtr
 	blockSize := *blockSizeFlagPtr
+	verbose := *verboseFlagPtr
 
 	workerConfig := WorkerSetting{
 		blockSize:  blockSize,
@@ -107,7 +109,9 @@ func main() {
 
 	// loop through files
 	for _, f := range inputPaths {
-		debugLog.Printf("Processing file %s", f)
+		if verbose {
+			debugLog.Printf("Processing file %s", f)
+		}
 
 		// test split file
 		//testSplit(f, spec)
@@ -124,7 +128,9 @@ func main() {
 		}
 
 		for i := 0; i < numProcess; i++ {
-			debugLog.Printf("Spawning worker %d", i)
+			if verbose {
+				debugLog.Printf("Spawning worker %d", i)
+			}
 			go worker(i, f, spec, workerConfig, WorkerChannels{
 				reportChannel,
 				waitChannel,
@@ -147,13 +153,19 @@ func main() {
 			if waitWorkers == numProcess {
 				waitWorkers = 0
 				for i := 0; i < numProcess; i++ {
-					debugLog.Printf("Writing worker %d\n", i)
+					if verbose {
+						debugLog.Printf("Writing worker %d\n", i)
+					}
 					controlChannels[i] <- "write"
 
-					debugLog.Printf("Waiting for worker %d to finish writing\n", i)
+					if verbose {
+						debugLog.Printf("Waiting for worker %d to finish writing\n", i)
+					}
 					<-controlChannels[i]
 
-					debugLog.Printf("Worker %d done writing\n", i)
+					if verbose {
+						debugLog.Printf("Worker %d done writing\n", i)
+					}
 				}
 			}
 
