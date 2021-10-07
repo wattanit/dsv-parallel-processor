@@ -57,7 +57,7 @@ func worker(index int,
 			}
 
 			func(outputBuffer []string, spec Spec) {
-				outputFile, err := os.OpenFile(spec.Output.OutputFile, os.O_APPEND, 0644)
+				outputFile, err := os.OpenFile(spec.Output.OutputFile, os.O_WRONLY|os.O_APPEND, 0644)
 				check(err)
 				defer func() {
 					err := outputFile.Close()

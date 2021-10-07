@@ -54,3 +54,15 @@ valueFile = "account_list.txt"
 
 # Golang datetime format can be found at https://programming.guide/go/format-parse-string-time-date-example.html
 ```
+
+## Run with Docker
+
+The provided ```filter_csv.sh``` script will run the program as a Docker container. 
+
+```
+./filter_csv.sh spec.toml data_dir
+```
+
+Please note the following details:
+1. All input and output files are mounted to the container at /data directory. Therefore, all *data_dir* paths in the spec file must be replaced by ```/data/```
+

@@ -23,6 +23,6 @@ FROM gcr.io/distroless/base-debian10
 
 WORKDIR /
 
-COPY --from=build /dsv-parallel-processor /dsk-parallel-processor
+COPY --from=build /dsv-parallel-processor /dsv-parallel-processor
 
 ENTRYPOINT [ "/dsv-parallel-processor" ]
