@@ -34,8 +34,8 @@ type SpecFilter struct {
 
 func main() {
 	// parse CLI flags
-	numProcessFlagPtr := flag.Int("p", 1, "number of worker processes")
-	blockSizeFlagPtr := flag.Int("block-size", 100000, "processing block size in number of lines")
+	numProcessFlagPtr := flag.Int("p", 4, "number of worker processes")
+	blockSizeFlagPtr := flag.Int("block-size", 1000000, "processing block size in number of lines")
 	verboseFlagPtr := flag.Bool("v", false, "Display DEBUG logs")
 
 	flag.Parse()
