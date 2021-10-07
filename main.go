@@ -20,12 +20,15 @@ type Spec struct {
 		OutputFile string
 		Separator  string
 	}
-	Filters []struct {
-		Column     int
-		ColumnType string
-		Values     []string
-		ValueFile  string
-	}
+	Filters []SpecFilter
+}
+type SpecFilter struct {
+	Column     int
+	ColumnType string
+	Values     []string
+	ValueFile  string
+	Value      string
+	Condition  string
 }
 
 func main() {
@@ -87,11 +90,13 @@ func main() {
 
 	// load filter input file
 	for i := 0; i < len(spec.Filters); i++ {
-		if len(spec.Filters[i].Values) == 0 {
-			if spec.Filters[i].ValueFile != "" {
-				spec.Filters[i].Values = readValueFile(spec.Filters[i].ValueFile)
-			} else {
-				log.Fatal("[Error] Invalid spec file - filter values not specified")
+		if spec.Filters[i].ColumnType == "string" {
+			if len(spec.Filters[i].Values) == 0 {
+				if spec.Filters[i].ValueFile != "" {
+					spec.Filters[i].Values = readValueFile(spec.Filters[i].ValueFile)
+				} else {
+					log.Fatal("[Error] Invalid spec file - filter values not specified")
+				}
 			}
 		}
 	}

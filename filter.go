@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -16,6 +17,7 @@ func filter(line string, spec Spec) bool {
 		if len(cells) < filter.Column {
 			return false
 		}
+
 		columnValue := cells[filter.Column]
 		//fmt.Println(columnValue)
 		//fmt.Println(isin(columnValue, filter.Values))
@@ -23,7 +25,16 @@ func filter(line string, spec Spec) bool {
 		case "datetime":
 			continue
 		case "number":
-			continue
+			{
+				colValue, err := strconv.ParseFloat(columnValue, 64)
+				if err != nil {
+					return false
+				}
+				if !compareNumberField(colValue, filter) {
+					return false
+				}
+			}
+
 		// string type is default
 		default:
 			{
@@ -34,5 +45,24 @@ func filter(line string, spec Spec) bool {
 		}
 	}
 	return true
+}
 
+func compareNumberField(columeValue float64, filter SpecFilter) bool {
+	filterValue, err := strconv.ParseFloat(filter.Value, 64)
+	check(err)
+
+	switch filter.Condition {
+	case "<":
+		return columeValue < filterValue
+	case "<=":
+		return columeValue <= filterValue
+	case ">":
+		return columeValue > filterValue
+	case ">=":
+		return columeValue >= filterValue
+	case "==":
+		return columeValue == filterValue
+	default:
+		return columeValue == filterValue
+	}
 }

@@ -15,18 +15,32 @@ outputFile = "output.tsv"
 separator = "\t"
 
 # each filter condition is listed below
-[[filters]]
-
-column = 16
-columnType = "string"
-values = [
-    "LN.DARCLS",
-    "LN.PROVCAT"
-]
+# [[filters]]
+#
+# column = 16
+# columnType = "string"
+# values = [
+#     "LN.DARCLS",
+#     "LN.PROVCAT"
+# ]
 
 # or from a file, one line per one value
 # valueFile = "filter.txt"
 
 # or as a range (for number and datetime)
 # condition = "<"
+# Golang datetime format can be found at https://programming.guide/go/format-parse-string-time-date-example.html
+# datetimeFormat = "02/01/2006"
 # value = 1979-05-27T07:32:00
+
+# [[filters]]
+# column = 1
+# columnType = "string"
+# valueFile = "account_list.txt"
+
+# Example of number filter
+# [[filters]]
+# column = 6
+# columnType = "number"
+# condition = "<"
+# value = "250"
