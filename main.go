@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 )
 
@@ -39,51 +40,41 @@ func main() {
 		// spawn workers
 		reportChannel := make(chan string, 100)
 		doneChannel := make(chan bool, numProcess)
+		waitChannel := make(chan bool, numProcess)
 		controlChannels := []WorkerChannels{}
 
 		for i := 0; i < numProcess; i++ {
 			controlChannels = append(controlChannels, WorkerChannels{
 				control: make(chan string),
-				done:    make(chan bool),
 			})
 		}
 
 		for i := 0; i < numProcess; i++ {
 			fmt.Println(i)
-			go worker(i, filePath, workerConfig, reportChannel, doneChannel, controlChannels[i])
+			go worker(i, filePath, workerConfig, reportChannel, waitChannel, doneChannel, controlChannels[i])
 		}
 
 		// process monitoring
 		doneWorkers := 0
-		//waitWorkers := 0
+		waitWorkers := 0
 		for {
-
-			//if doneWorkers == numProcess {
-			//	break
-			//}
-			//if waitWorkers == numProcess{
-			//	fmt.Println("Reseting waitWorkers")
-			//	waitWorkers = 0
-			//	fmt.Println(waitWorkers)
-			//	for i := 0; i < numProcess; i++ {
-			//		channels.control <- "0"
-			//	}
-			//
-			//	fmt.Println("Shout writing")
-			//	channels.control <- "write"
-			//	fmt.Println("Waiting response")
-			//	//<-channels.control
-			//}
-
-			//for i := 0; i < numProcess; i++{
-			//	channels.control <- "go"
-			//}
-			//}
 			if len(reportChannel) > 0 {
 				r := <-reportChannel
 				fmt.Println(r)
 			}
-
+			if waitWorkers == numProcess {
+				waitWorkers = 0
+				for i := 0; i < numProcess; i++ {
+					_, err := fmt.Fprintf(os.Stdout, "Writing worker %d\n", i)
+					check(err)
+					controlChannels[i].control <- "write"
+					_, err = fmt.Fprintf(os.Stdout, "Waiting for worker %d to finish writing\n", i)
+					check(err)
+					<-controlChannels[i].control
+					_, err = fmt.Fprintf(os.Stdout, "Worker %d done writing\n", i)
+					check(err)
+				}
+			}
 			if doneWorkers == numProcess {
 				fmt.Println(doneWorkers)
 				break
@@ -91,6 +82,8 @@ func main() {
 			select {
 			case <-doneChannel:
 				doneWorkers++
+			case <-waitChannel:
+				waitWorkers++
 			default:
 
 			}
