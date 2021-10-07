@@ -25,7 +25,8 @@ func main() {
 	}
 
 	workerConfig := WorkerSetting{
-		blockSize: blockSize,
+		blockSize:  blockSize,
+		numProcess: numProcess,
 	}
 
 	inputPath := args[0]
