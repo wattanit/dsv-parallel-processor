@@ -13,21 +13,22 @@ func filter(line string, spec Spec) bool {
 	for _, filter := range spec.Filters {
 		//fmt.Println(filter)
 
-		if len(cells) >= filter.Column {
-			columnValue := cells[filter.Column]
-			//fmt.Println(columnValue)
-			//fmt.Println(isin(columnValue, filter.Values))
-			switch filter.ColumnType {
-			case "datetime":
-				continue
-			case "number":
-				continue
-			// string type is default
-			default:
-				{
-					if !isin(columnValue, filter.Values) {
-						return false
-					}
+		if len(cells) < filter.Column {
+			return false
+		}
+		columnValue := cells[filter.Column]
+		//fmt.Println(columnValue)
+		//fmt.Println(isin(columnValue, filter.Values))
+		switch filter.ColumnType {
+		case "datetime":
+			continue
+		case "number":
+			continue
+		// string type is default
+		default:
+			{
+				if !isin(columnValue, filter.Values) {
+					return false
 				}
 			}
 		}

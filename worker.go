@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type WorkerSetting struct {
@@ -42,8 +43,6 @@ func worker(index int,
 			if filter(line, spec) {
 				outputBuffer = append(outputBuffer, line)
 			}
-
-			// LOAD OUTPUT TO BUFFER HERE
 		}
 
 		lineNumber++
@@ -57,7 +56,22 @@ func worker(index int,
 			for <-channels.Control != "write" {
 			}
 
-			// WRITE FILE HERE
+			func(outputBuffer []string, spec Spec) {
+				outputFile, err := os.OpenFile(spec.Output.OutputFile, os.O_APPEND, 0644)
+				check(err)
+				defer func() {
+					err := outputFile.Close()
+					check(err)
+				}()
+
+				for _, line := range outputBuffer {
+					cells := strings.Split(line, spec.Input.Separator)
+					_, err := outputFile.WriteString(strings.Join(cells, spec.Output.Separator) + "\n")
+					check(err)
+				}
+			}(outputBuffer, spec)
+
+			outputBuffer = nil
 
 			// report writing complete
 			channels.Control <- "done"

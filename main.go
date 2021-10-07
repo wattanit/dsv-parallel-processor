@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"github.com/pelletier/go-toml/v2"
@@ -106,9 +105,9 @@ func main() {
 		debugLog.Printf("Processing file %s", f)
 
 		// test split file
-		testSplit(f, spec)
-
-		continue
+		//testSplit(f, spec)
+		//
+		//continue
 		// spawn workers
 		reportChannel := make(chan string, 100)
 		doneChannel := make(chan bool, numProcess)
@@ -172,26 +171,26 @@ func main() {
 	}
 }
 
-func testSplit(inputFile string, spec Spec) {
-	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
-	check(err)
-	defer func() {
-		err := input.Close()
-		check(err)
-	}()
-
-	scanner := bufio.NewScanner(input)
-	lineNumber := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		if filter(line, spec) {
-			fmt.Println(line)
-		}
-
-		// LOAD OUTPUT TO BUFFER HERE
-		lineNumber++
-		if lineNumber > 100 {
-			break
-		}
-	}
-}
+//func testSplit(inputFile string, spec Spec) {
+//	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
+//	check(err)
+//	defer func() {
+//		err := input.Close()
+//		check(err)
+//	}()
+//
+//	scanner := bufio.NewScanner(input)
+//	lineNumber := 0
+//	for scanner.Scan() {
+//		line := scanner.Text()
+//		if filter(line, spec) {
+//			fmt.Println(line)
+//		}
+//
+//		// LOAD OUTPUT TO BUFFER HERE
+//		lineNumber++
+//		if lineNumber > 100 {
+//			break
+//		}
+//	}
+//}
