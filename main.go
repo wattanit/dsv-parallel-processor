@@ -37,25 +37,62 @@ func main() {
 		fmt.Println(filePath)
 
 		// spawn workers
-		report := make(chan string)
-		control := make(chan bool)
+		reportChannel := make(chan string, 100)
+		doneChannel := make(chan bool, numProcess)
+		controlChannels := []WorkerChannels{}
+
+		for i := 0; i < numProcess; i++ {
+			controlChannels = append(controlChannels, WorkerChannels{
+				control: make(chan string),
+				done:    make(chan bool),
+			})
+		}
+
 		for i := 0; i < numProcess; i++ {
 			fmt.Println(i)
-			go worker(i, filePath, workerConfig, report, control)
+			go worker(i, filePath, workerConfig, reportChannel, doneChannel, controlChannels[i])
 		}
 
 		// process monitoring
 		doneWorkers := 0
+		//waitWorkers := 0
 		for {
+
+			//if doneWorkers == numProcess {
+			//	break
+			//}
+			//if waitWorkers == numProcess{
+			//	fmt.Println("Reseting waitWorkers")
+			//	waitWorkers = 0
+			//	fmt.Println(waitWorkers)
+			//	for i := 0; i < numProcess; i++ {
+			//		channels.control <- "0"
+			//	}
+			//
+			//	fmt.Println("Shout writing")
+			//	channels.control <- "write"
+			//	fmt.Println("Waiting response")
+			//	//<-channels.control
+			//}
+
+			//for i := 0; i < numProcess; i++{
+			//	channels.control <- "go"
+			//}
+			//}
+			if len(reportChannel) > 0 {
+				r := <-reportChannel
+				fmt.Println(r)
+			}
+
 			if doneWorkers == numProcess {
+				fmt.Println(doneWorkers)
 				break
 			}
 			select {
-			case r := <-report:
-				fmt.Println(r)
-			case <-control:
+			case <-doneChannel:
 				doneWorkers++
-				fmt.Println(doneWorkers)
+			default:
+
 			}
 		}
 	}
