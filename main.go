@@ -185,26 +185,3 @@ func testSplit(inputFile string, spec Spec) {
 		}
 	}
 }
-
-func readValueFile(inputFile string) []string {
-	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
-	check(err)
-	defer func() {
-		err := input.Close()
-		check(err)
-	}()
-
-	var outputList []string
-
-	scanner := bufio.NewScanner(input)
-	for scanner.Scan() {
-		outputList = append(outputList, scanner.Text())
-	}
-	return outputList
-}
-
-func check(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}

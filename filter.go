@@ -35,12 +35,3 @@ func filter(line string, spec Spec) bool {
 	return true
 
 }
-
-func isin(a string, list []string) bool {
-	for _, item := range list {
-		if item == a {
-			return true
-		}
-	}
-	return false
-}
