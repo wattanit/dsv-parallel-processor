@@ -20,6 +20,7 @@ type WorkerChannels struct {
 
 func worker(index int,
 	inputFile string,
+	spec Spec,
 	config WorkerSetting,
 	channels WorkerChannels) {
 	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
@@ -31,10 +32,16 @@ func worker(index int,
 
 	scanner := bufio.NewScanner(input)
 	lineNumber := 0
+	var outputBuffer []string
+
 	for scanner.Scan() {
 
 		if (lineNumber % config.numProcess) == index {
 			// PROCESS LINE HERE
+			line := scanner.Text()
+			if filter(line, spec) {
+				outputBuffer = append(outputBuffer, line)
+			}
 
 			// LOAD OUTPUT TO BUFFER HERE
 		}

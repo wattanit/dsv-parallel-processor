@@ -15,26 +15,17 @@ outputFile = "output.tsv"
 separator = "\t"
 
 # each filter condition is listed below
-[[filter]]
+[[filters]]
 
-column = 1
+column = 16
 columnType = "string"
 values = [
-    "OPTION1",
-    "OPTION2"
+    "LN.DARCLS",
+    "LN.PROVCAT"
 ]
-
-[[filter]]
-column = 3
-columnType = "string"
-values = [
-    "A",
-    "B"
-]
-
 
 # or from a file, one line per one value
-# value_list = "selected_value.txt"
+# valueFile = "filter.txt"
 
 # or as a range (for number and datetime)
 # condition = "<"

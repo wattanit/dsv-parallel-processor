@@ -1,15 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"github.com/pelletier/go-toml/v2"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
-
-	//"io/ioutil"
-	"log"
 )
 
 type Spec struct {
@@ -22,10 +21,11 @@ type Spec struct {
 		OutputFile string
 		Separator  string
 	}
-	Filter []struct {
+	Filters []struct {
 		Column     int
 		ColumnType string
 		Values     []string
+		ValueFile  string
 	}
 }
 
@@ -76,6 +76,17 @@ func main() {
 		log.Fatalf("[Error] No input file specified in %s", specFilePath)
 	}
 
+	// load filter input file
+	for i := 0; i < len(spec.Filters); i++ {
+		if len(spec.Filters[i].Values) == 0 {
+			if spec.Filters[i].ValueFile != "" {
+				spec.Filters[i].Values = readValueFile(spec.Filters[i].ValueFile)
+			} else {
+				log.Fatal("[Error] Invalid spec file - filter values not specified")
+			}
+		}
+	}
+
 	// init loggers
 	debugLog := log.New(os.Stdout, "[DEBUG]", log.Ldate|log.Ltime)
 	infoLog := log.New(os.Stdout, "[INFO]", log.Ldate|log.Ltime)
@@ -84,6 +95,10 @@ func main() {
 	for _, f := range inputPaths {
 		debugLog.Printf("Processing file %s", f)
 
+		// test split file
+		testSplit(f, spec)
+
+		continue
 		// spawn workers
 		reportChannel := make(chan string, 100)
 		doneChannel := make(chan bool, numProcess)
@@ -96,7 +111,7 @@ func main() {
 
 		for i := 0; i < numProcess; i++ {
 			debugLog.Printf("Spawning worker %d", i)
-			go worker(i, f, workerConfig, WorkerChannels{
+			go worker(i, f, spec, workerConfig, WorkerChannels{
 				reportChannel,
 				waitChannel,
 				doneChannel,
@@ -145,6 +160,47 @@ func main() {
 			}
 		}
 	}
+}
+
+func testSplit(inputFile string, spec Spec) {
+	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
+	check(err)
+	defer func() {
+		err := input.Close()
+		check(err)
+	}()
+
+	scanner := bufio.NewScanner(input)
+	lineNumber := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		if filter(line, spec) {
+			fmt.Println(line)
+		}
+
+		// LOAD OUTPUT TO BUFFER HERE
+		lineNumber++
+		if lineNumber > 100 {
+			break
+		}
+	}
+}
+
+func readValueFile(inputFile string) []string {
+	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
+	check(err)
+	defer func() {
+		err := input.Close()
+		check(err)
+	}()
+
+	var outputList []string
+
+	scanner := bufio.NewScanner(input)
+	for scanner.Scan() {
+		outputList = append(outputList, scanner.Text())
+	}
+	return outputList
 }
 
 func check(err error) {
