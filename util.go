@@ -6,6 +6,17 @@ import (
 	"os"
 )
 
+func checkFileExist(filePath string) bool {
+	if _, err := os.Stat(filePath); err == nil {
+		return true
+	} else if os.IsNotExist(err) {
+		return false
+	} else {
+		log.Fatal(err)
+	}
+	return false
+}
+
 func readValueFile(inputFile string) []string {
 	input, err := os.OpenFile(inputFile, os.O_RDONLY, 0600)
 	check(err)

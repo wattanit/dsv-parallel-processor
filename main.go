@@ -60,6 +60,16 @@ func main() {
 	err = toml.Unmarshal(specFile, &spec)
 	check(err)
 
+	// check output file
+	if checkFileExist(spec.Output.OutputFile) {
+		log.Fatal("[Error] Output file already existed")
+	} else {
+		outputFile, err := os.Create(spec.Output.OutputFile)
+		check(err)
+		err = outputFile.Close()
+		check(err)
+	}
+
 	// create input file list
 	var inputPaths []string
 	if spec.Input.Directory != "" {
