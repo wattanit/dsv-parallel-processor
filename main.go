@@ -17,8 +17,6 @@ func main() {
 
 	numProcess := *numProcessFlagPtr
 	blockSize := *blockSizeFlagPtr
-	fmt.Println(numProcess)
-	fmt.Println(blockSize)
 
 	args := flag.Args()
 	if len(args) < 1 {
@@ -33,9 +31,12 @@ func main() {
 	inputPath := args[0]
 	inputFiles, _ := ioutil.ReadDir(inputPath)
 
+	debugLog := log.New(os.Stdout, "[DEBUG]", log.Ldate|log.Ltime)
+	infoLog := log.New(os.Stdout, "[INFO]", log.Ldate|log.Ltime)
+
 	for _, f := range inputFiles {
 		filePath := path.Join(inputPath, f.Name())
-		fmt.Println(filePath)
+		debugLog.Printf("Processing file %s", filePath)
 
 		// spawn workers
 		reportChannel := make(chan string, 100)
@@ -50,7 +51,7 @@ func main() {
 		}
 
 		for i := 0; i < numProcess; i++ {
-			fmt.Println(i)
+			debugLog.Printf("Spawning worker %d", i)
 			go worker(i, filePath, workerConfig, reportChannel, waitChannel, doneChannel, controlChannels[i])
 		}
 
@@ -60,19 +61,18 @@ func main() {
 		for {
 			if len(reportChannel) > 0 {
 				r := <-reportChannel
-				fmt.Println(r)
+				infoLog.Println(r)
 			}
 			if waitWorkers == numProcess {
 				waitWorkers = 0
 				for i := 0; i < numProcess; i++ {
-					_, err := fmt.Fprintf(os.Stdout, "Writing worker %d\n", i)
-					check(err)
+					debugLog.Printf("Writing worker %d\n", i)
 					controlChannels[i].control <- "write"
-					_, err = fmt.Fprintf(os.Stdout, "Waiting for worker %d to finish writing\n", i)
-					check(err)
+
+					debugLog.Printf("Waiting for worker %d to finish writing\n", i)
 					<-controlChannels[i].control
-					_, err = fmt.Fprintf(os.Stdout, "Worker %d done writing\n", i)
-					check(err)
+
+					debugLog.Printf("Worker %d done writing\n", i)
 				}
 			}
 			if doneWorkers == numProcess {

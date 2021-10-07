@@ -33,6 +33,10 @@ func worker(index int,
 	for scanner.Scan() {
 		lineNumber++
 
+		// PROCESS LINE HERE
+
+		// LOAD OUTPUT TO BUFFER HERE
+
 		// finished a block, report and waiting
 		if (lineNumber % config.blockSize) == 0 {
 			reportChannel <- fmt.Sprintf("worker %d completed %d lines", index, lineNumber)
