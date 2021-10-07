@@ -7,41 +7,50 @@ DSV Parallel Processor takes input files and query specification via a spec file
 Example spec.toml
 
 ```text
-[input]
-# list all input file in a list
-file_path = [
-    "test_data/test_data2.txt"
-]
+[[input]]
+# filePaths = [                          # list all input file in a list
+#     "test_data/test_data2.txt"
+# ]
 
-# or specify just the input directory
-directory = "test_data"
-
+directory = "test_data"                  # or specify just the input directory
 separator = "|"
 
-[output]
-# name the output file
-outputFile = "output.tsv"
+[[output]]
+outputFile = "output.tsv"                # name the output file
 separator = "\t"
 
 # each filter condition is listed below
-[filter]
 
-# specify column number to filter (0th-index)
-column = 1
-
-# specify column type, currently support number, string, datetime
-columnType = string
-
-# specify accept value as a list
-values = [
-    "OPTION1",
-    "OPTION2"
+# example of string filter
+[[filters]]
+column = 16                              # specify column to filter (0th-index)
+columnType = "string"                    # available type are string, number, datetime
+values = [                               # list accepted value as a list
+    "OPTION2",
+    "OPTION1"
 ]
 
-# or from a file, one line per one value
-value_list = "selected_value.txt"
+# valueFile = "filter.txt"               # or read value from a file, one line per one value
 
-# or as a range (for number and datetime)
-condition = "<"
-value = 1979-05-27T07:32:00
+[[filters]]
+column = 1
+columnType = "string"
+valueFile = "account_list.txt"
+
+# Example of number filter
+# [[filters]]
+# column = 6                             # specify column to filter (0th-index)
+# columnType = "number"                  # available type are string, number, datetime
+# condition = "<"                        # available condition "<", "<=", ">", ">=", "=="
+# value = "250"                          # condition value to check
+
+# Example of datetime filter
+# [[filters]]
+# column = 3                             # specify column to filter (0th-index)
+# columnType = "datetime"                # available type are string, number, datetime
+# condition = "<"                        # available condition "<", "<=", ">", ">=", "=="
+# datetimeFormat = "02/01/2006"          # specify datetime format using Golang's notation.
+# value = "01/01/2015"                   # condition value to check
+
+# Golang datetime format can be found at https://programming.guide/go/format-parse-string-time-date-example.html
 ```

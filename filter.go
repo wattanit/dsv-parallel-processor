@@ -3,6 +3,7 @@ package main
 import (
 	"strconv"
 	"strings"
+	"time"
 )
 
 func filter(line string, spec Spec) bool {
@@ -12,27 +13,21 @@ func filter(line string, spec Spec) bool {
 	cells := strings.Split(line, inputSeparator)
 
 	for _, filter := range spec.Filters {
-		//fmt.Println(filter)
 
 		if len(cells) < filter.Column {
 			return false
 		}
 
 		columnValue := cells[filter.Column]
-		//fmt.Println(columnValue)
-		//fmt.Println(isin(columnValue, filter.Values))
+
 		switch filter.ColumnType {
 		case "datetime":
-			continue
+			if !compareDatetimeField(columnValue, filter) {
+				return false
+			}
 		case "number":
-			{
-				colValue, err := strconv.ParseFloat(columnValue, 64)
-				if err != nil {
-					return false
-				}
-				if !compareNumberField(colValue, filter) {
-					return false
-				}
+			if !compareNumberField(columnValue, filter) {
+				return false
 			}
 
 		// string type is default
@@ -47,22 +42,52 @@ func filter(line string, spec Spec) bool {
 	return true
 }
 
-func compareNumberField(columeValue float64, filter SpecFilter) bool {
+func compareNumberField(columeValue string, filter SpecFilter) bool {
+	colValue, err := strconv.ParseFloat(columeValue, 64)
+	if err != nil {
+		return false
+	}
 	filterValue, err := strconv.ParseFloat(filter.Value, 64)
 	check(err)
 
 	switch filter.Condition {
 	case "<":
-		return columeValue < filterValue
+		return colValue < filterValue
 	case "<=":
-		return columeValue <= filterValue
+		return colValue <= filterValue
 	case ">":
-		return columeValue > filterValue
+		return colValue > filterValue
 	case ">=":
-		return columeValue >= filterValue
+		return colValue >= filterValue
 	case "==":
-		return columeValue == filterValue
+		return colValue == filterValue
 	default:
-		return columeValue == filterValue
+		return colValue == filterValue
 	}
+}
+
+func compareDatetimeField(columnValue string, filter SpecFilter) bool {
+	colValue, err := time.Parse(filter.DatetimeFormat, columnValue)
+	if err != nil {
+		return false
+	}
+
+	filterValue, err := time.Parse(filter.DatetimeFormat, filter.Value)
+	check(err)
+
+	switch filter.Condition {
+	case "<":
+		return colValue.Before(filterValue)
+	case "<=":
+		return colValue.Before(filterValue) || colValue.Equal(filterValue)
+	case ">":
+		return colValue.After(filterValue)
+	case ">=":
+		return colValue.After(filterValue) || colValue.Equal(filterValue)
+	case "==":
+		return colValue.Equal(filterValue)
+	default:
+		return colValue.Equal(filterValue)
+	}
+
 }
