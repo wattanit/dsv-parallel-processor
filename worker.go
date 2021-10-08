@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -49,15 +50,16 @@ func worker(index int,
 		// finished a block, report and waiting
 		if (lineNumber % config.blockSize) == 0 {
 			channels.Report <- fmt.Sprintf("worker %d completed %d lines", index, lineNumber)
-			channels.Wait <- true
+			//channels.Wait <- true
 
 			// proceed to write file output
 			// wait for write command
-			for <-channels.Control != "write" {
-			}
+			//for <-channels.Control != "write" {
+			//}
 
 			func(outputBuffer []string, spec Spec) {
-				outputFile, err := os.OpenFile(spec.Output.OutputFile, os.O_WRONLY|os.O_APPEND, 0644)
+				outputFilePath := path.Join(spec.Output.OutputFile, fmt.Sprintf("%d", index))
+				outputFile, err := os.OpenFile(outputFilePath, os.O_WRONLY|os.O_APPEND, 0644)
 				check(err)
 				defer func() {
 					err := outputFile.Close()
@@ -71,10 +73,10 @@ func worker(index int,
 				}
 			}(outputBuffer, spec)
 
-			outputBuffer = nil
-
 			// report writing complete
-			channels.Control <- "done"
+			channels.Report <- fmt.Sprintf("worker %d wrote %d filtered lines", index, len(outputBuffer))
+			outputBuffer = nil
+			//channels.Control <- "done"
 		}
 	}
 

@@ -69,9 +69,18 @@ func main() {
 	if checkFileExist(spec.Output.OutputFile) {
 		log.Fatal("[Error] Output file already existed")
 	} else {
-		outputFile, err := os.Create(spec.Output.OutputFile)
-		check(err)
-		err = outputFile.Close()
+		err := os.Mkdir(spec.Output.OutputFile, 0755)
+		for i := 0; i < numProcess; i++ {
+			func() {
+				outputFilePath := path.Join(spec.Output.OutputFile, fmt.Sprintf("%d", i))
+				f, err := os.Create(outputFilePath)
+				check(err)
+				defer func() {
+					err := f.Close()
+					check(err)
+				}()
+			}()
+		}
 		check(err)
 	}
 
@@ -147,24 +156,24 @@ func main() {
 				infoLog.Println(r)
 			}
 			// sync file writing queue
-			if waitWorkers == numProcess {
-				waitWorkers = 0
-				for i := 0; i < numProcess; i++ {
-					if verbose {
-						debugLog.Printf("Writing worker %d\n", i)
-					}
-					controlChannels[i] <- "write"
-
-					if verbose {
-						debugLog.Printf("Waiting for worker %d to finish writing\n", i)
-					}
-					<-controlChannels[i]
-
-					if verbose {
-						debugLog.Printf("Worker %d done writing\n", i)
-					}
-				}
-			}
+			//if waitWorkers == numProcess {
+			//	waitWorkers = 0
+			//	for i := 0; i < numProcess; i++ {
+			//		if verbose {
+			//			debugLog.Printf("Writing worker %d\n", i)
+			//		}
+			//		controlChannels[i] <- "write"
+			//
+			//		if verbose {
+			//			debugLog.Printf("Waiting for worker %d to finish writing\n", i)
+			//		}
+			//		<-controlChannels[i]
+			//
+			//		if verbose {
+			//			debugLog.Printf("Worker %d done writing\n", i)
+			//		}
+			//	}
+			//}
 
 			// break monitoring loop when all workers are done
 			if doneWorkers == numProcess {
