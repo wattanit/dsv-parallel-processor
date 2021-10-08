@@ -5,4 +5,4 @@ DATA_DIR=$(realpath $2 )
 echo "spec file directory = $SPEC_DIR"
 echo "input file directory = $DATA_DIR"
 
-docker run -it --rm -v $SPEC_DIR:/spec -v $DATA_DIR:/data dsv-parallel-processor:0.1 /spec/$1
+docker run -it --rm -v $SPEC_DIR:/spec -v $DATA_DIR:/data dsv-parallel-processor:0.1 -p=5 /spec/$1
